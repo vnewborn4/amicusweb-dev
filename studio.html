@@ -176,6 +176,21 @@
       
       <!-- COMPONENT SYNTHESIZER VIEW -->
       <div id="view-component" class="flex flex-col gap-4">
+        <!-- ACTIVE ELEMENT CONTEXT TARGET PILL (When element is selected in canvas/hierarchy) -->
+        <div id="selectedElementBanner" class="hidden p-2.5 rounded-lg bg-cyan-950/90 border border-cyan-500/60 flex flex-col gap-1 text-xs font-mono shadow-lg shadow-cyan-950/50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span class="text-cyan-400 font-bold uppercase text-[10px]">AI CONTEXT TARGET:</span>
+              <span id="bannerTag" class="px-1.5 py-0.5 rounded bg-cyan-900 text-white font-bold text-[10px]">&lt;img&gt;</span>
+              <span id="bannerId" class="text-cyan-300 text-[10px]">#el-3</span>
+            </div>
+            <button onclick="clearSelectedElement()" class="text-gray-400 hover:text-white text-xs px-1" title="Deselect element">✕</button>
+          </div>
+          <div id="bannerClasses" class="text-[10px] text-gray-400 truncate">.w-full .max-w-lg</div>
+          <div class="text-[10px] text-cyan-200/90 italic">Prompt execution will modify ONLY this element!</div>
+        </div>
+
         <div>
           <div class="flex justify-between items-center mb-1.5">
             <label class="text-xs font-mono uppercase tracking-wider text-gray-300 font-semibold flex items-center gap-1.5">
@@ -247,6 +262,19 @@
               </div>
               <span class="text-[10px] text-gray-500 font-mono bg-gray-900 px-1.5 py-0.5 rounded border border-gray-800">Alt+5</span>
             </button>
+          </div>
+        </div>
+
+        <!-- SELECTABLE SITE ITEMS / HIERARCHY TREE -->
+        <div class="pt-2 border-t border-gray-800/80">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-mono uppercase tracking-wider text-gray-300 font-semibold flex items-center gap-1.5">
+              <span>🌳</span> SELECTABLE SITE ITEMS (<span id="elementCountBadge" class="text-cyan-400">0</span>)
+            </span>
+            <button onclick="refreshElementTree()" class="text-[10px] text-gray-400 hover:text-cyan-300 font-mono transition">⟳ Re-index</button>
+          </div>
+          <div id="elementTreeList" class="max-h-44 overflow-y-auto space-y-1 bg-gray-950/80 p-2 rounded-lg border border-gray-800 text-[11px] font-mono text-gray-300">
+            <div class="text-gray-500 text-center py-2 text-[10px]">Click any element in canvas or load a demo to index items.</div>
           </div>
         </div>
       </div>
@@ -378,22 +406,57 @@
           </div>
         </div>
 
-        <!-- FIGMA DEV MODE: Interactive In-Situ Selected Node Dock (Hidden until node clicked in inspector) -->
-        <div id="devModeDock" class="hidden px-4 py-2 border-b border-cyan-800/60 bg-cyan-950/60 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs font-mono z-20">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded bg-cyan-900/80 text-cyan-300 border border-cyan-700/60 font-semibold" id="nodeTag">&lt;div&gt;</span>
-            <span class="text-gray-400 text-[11px]" id="nodeDimensions">240 × 64px</span>
-            <span class="text-gray-500">|</span>
-            <span class="text-gray-300 text-[11px] truncate max-w-xs" id="nodeClasses">.rounded-xl .bg-gray-900</span>
+        <!-- FIGMA DEV MODE & IN-SITU CONTEXTUAL AI DOCK -->
+        <div id="devModeDock" class="hidden px-4 py-2.5 border-b border-cyan-800/60 bg-cyan-950/85 backdrop-blur-md flex flex-col gap-2 text-xs font-mono z-20 shadow-xl shadow-black/50">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded bg-cyan-900/90 text-cyan-300 border border-cyan-700/60 font-semibold" id="nodeTag">&lt;div&gt;</span>
+              <span class="text-cyan-400 font-bold" id="nodeIdBadge">#el-1</span>
+              <span class="text-gray-400 text-[11px]" id="nodeDimensions">240 × 64px</span>
+              <span class="text-gray-600">|</span>
+              <span class="text-gray-300 text-[11px] truncate max-w-xs" id="nodeClasses">.rounded-xl .bg-gray-900</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="copySelectedClasses()" class="px-2 py-0.5 rounded bg-gray-900/80 hover:bg-gray-800 text-gray-300 hover:text-white transition text-[11px] border border-gray-700/60">
+                Copy Classes
+              </button>
+              <button onclick="copySelectedHtml()" class="px-2 py-0.5 rounded bg-gray-900/80 hover:bg-gray-800 text-gray-300 hover:text-white transition text-[11px] border border-gray-700/60">
+                Copy HTML
+              </button>
+              <button onclick="closeDevModeDock()" class="text-gray-400 hover:text-white text-sm leading-none ml-1" title="Deselect">✕</button>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="copySelectedClasses()" class="px-2 py-0.5 rounded bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 hover:text-white transition text-[11px]">
-              Copy Classes
+
+          <!-- In-Situ Contextual AI Prompt Input -->
+          <div class="flex items-center gap-2 bg-gray-950/90 p-1.5 rounded-lg border border-cyan-700/60 focus-within:border-cyan-400 transition">
+            <span class="text-cyan-400 text-sm ml-1">✨</span>
+            <input id="dockPromptInput" type="text" class="flex-1 bg-transparent text-xs text-white placeholder-gray-500 font-mono focus:outline-none" placeholder="Tell AI what to do with this element (e.g. 'make 10% smaller and center it')..." onkeydown="if(event.key === 'Enter') executeContextualTransform('dock')">
+            <button onclick="executeContextualTransform('dock')" id="dockApplyBtn" class="bg-cyan-600 hover:bg-cyan-500 text-white font-mono px-3 py-1 rounded text-xs font-semibold flex items-center gap-1 transition shadow-md shadow-cyan-600/30 whitespace-nowrap">
+              <span>⚡ Modify Element</span>
             </button>
-            <button onclick="copySelectedHtml()" class="px-2 py-0.5 rounded bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 hover:text-white transition text-[11px]">
-              Copy HTML
+          </div>
+
+          <!-- High-Speed 1-Click Action Chips -->
+          <div class="flex items-center gap-1.5 flex-wrap text-[10px]">
+            <span class="text-gray-500 uppercase font-semibold">Quick Actions:</span>
+            <button onclick="runQuickAction('make 10% smaller and center it')" class="px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-600 text-cyan-300 hover:bg-cyan-900 transition font-medium" title="Scale down 10% and apply block mx-auto">
+              📐 -10% & Center
             </button>
-            <button onclick="closeDevModeDock()" class="text-gray-400 hover:text-white text-sm leading-none ml-1">✕</button>
+            <button onclick="runQuickAction('center it')" class="px-2 py-0.5 rounded bg-gray-900 border border-gray-800 text-gray-300 hover:text-white hover:border-gray-700 transition">
+              ↔ Center
+            </button>
+            <button onclick="runQuickAction('make 10% smaller')" class="px-2 py-0.5 rounded bg-gray-900 border border-gray-800 text-gray-300 hover:text-white hover:border-gray-700 transition">
+              🔍 -10% Scale
+            </button>
+            <button onclick="runQuickAction('make 10% larger')" class="px-2 py-0.5 rounded bg-gray-900 border border-gray-800 text-gray-300 hover:text-white hover:border-gray-700 transition">
+              🔍 +10% Scale
+            </button>
+            <button onclick="runQuickAction('add cyan glow shadow and border')" class="px-2 py-0.5 rounded bg-gray-900 border border-gray-800 text-gray-300 hover:text-white hover:border-gray-700 transition">
+              ✨ Cyan Glow
+            </button>
+            <button onclick="runQuickAction('rounded full circle')" class="px-2 py-0.5 rounded bg-gray-900 border border-gray-800 text-gray-300 hover:text-white hover:border-gray-700 transition">
+              ⭕ Round Full
+            </button>
           </div>
         </div>
 
@@ -512,6 +575,9 @@
       { id: 'tab_patch', title: 'Switch Tool: Surgical Code Patcher', category: 'Navigation', hotkey: '', action: () => switchTab('patcher') },
       { id: 'tab_nocturnal', title: 'Switch Tool: Nocturnal Autonomous Intelligence', category: 'Navigation', hotkey: 'Alt+N', action: () => switchTab('nocturnal') },
       { id: 'run_nocturnal', title: 'Trigger Nocturnal Provider Discovery Cycle', category: 'Autonomous', hotkey: '', action: () => triggerNocturnalRun() },
+      { id: 'el_scale_center', title: 'Targeted Action: Make Selected Element 10% Smaller & Center', category: 'Element AI', hotkey: '', action: () => runQuickAction('make 10% smaller and center it') },
+      { id: 'el_clear', title: 'Clear Selected Element Target', category: 'Element AI', hotkey: 'Esc', action: () => clearSelectedElement() },
+      { id: 'el_reindex', title: 'Re-Index Selectable Site Items', category: 'Element AI', hotkey: '', action: () => refreshElementTree() },
       { id: 'help', title: 'Show Keyboard Shortcuts Cheat Sheet', category: 'Help', hotkey: '?', action: () => openShortcutsModal() }
     ];
 
@@ -676,22 +742,63 @@
       }
     }
 
-    // Figma Dev Mode Dock Controls
+    // Figma Dev Mode & Contextual Element Selection Controls
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'INSPECTOR_NODE_SELECTED') {
-        selectedNodeData = event.data;
-        const dock = document.getElementById('devModeDock');
-        document.getElementById('nodeTag').textContent = `<${selectedNodeData.tagName}>`;
-        document.getElementById('nodeDimensions').textContent = `${Math.round(selectedNodeData.width)} × ${Math.round(selectedNodeData.height)}px`;
-        document.getElementById('nodeClasses').textContent = selectedNodeData.className ? `.${selectedNodeData.className.split(' ').join(' .')}` : '(no classes)';
-        dock.classList.remove('hidden');
-        playSfx('click');
+        onElementSelected(event.data);
       }
     });
 
-    function closeDevModeDock() {
-      document.getElementById('devModeDock').classList.add('hidden');
+    function onElementSelected(data) {
+      selectedNodeData = data;
+      playSfx('click');
+
+      // Update In-Situ Dev Mode Dock
+      const dock = document.getElementById('devModeDock');
+      document.getElementById('nodeTag').textContent = `<${data.tagName}>`;
+      document.getElementById('nodeIdBadge').textContent = data.amicusId ? `#${data.amicusId}` : '';
+      document.getElementById('nodeDimensions').textContent = `${Math.round(data.width)} × ${Math.round(data.height)}px`;
+      document.getElementById('nodeClasses').textContent = data.className ? `.${data.className.split(' ').join(' .')}` : '(no classes)';
+      
+      const dockInput = document.getElementById('dockPromptInput');
+      if (dockInput) {
+        dockInput.placeholder = `Tell AI what to do with <${data.tagName}> (e.g. 'make 10% smaller and center it')...`;
+        dockInput.value = '';
+      }
+      dock.classList.remove('hidden');
+
+      // Update Left Rail Context Target Banner
+      const banner = document.getElementById('selectedElementBanner');
+      if (banner) {
+        banner.classList.remove('hidden');
+        document.getElementById('bannerTag').textContent = `<${data.tagName}>`;
+        document.getElementById('bannerId').textContent = data.amicusId ? `#${data.amicusId}` : '';
+        document.getElementById('bannerClasses').textContent = data.className ? `.${data.className.split(' ').join(' .')}` : '';
+      }
+
+      // Highlight in Element Tree
+      highlightElementInTree(data.amicusId);
+
+      showToast(`Selected <${data.tagName}>: Ready for targeted AI change`, '🎯');
+    }
+
+    function clearSelectedElement() {
       selectedNodeData = null;
+      document.getElementById('devModeDock').classList.add('hidden');
+      const banner = document.getElementById('selectedElementBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // Clear outline in iframe
+      const frame = document.getElementById('previewFrame');
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: 'CLEAR_SELECTION' }, '*');
+      }
+      highlightElementInTree(null);
+      showToast('Cleared element targeting', '🎯');
+    }
+
+    function closeDevModeDock() {
+      clearSelectedElement();
     }
 
     function copySelectedClasses() {
@@ -706,6 +813,161 @@
       navigator.clipboard.writeText(selectedNodeData.outerHTML || '');
       playSfx('success');
       showToast('Copied element HTML', '📋');
+    }
+
+    async function executeContextualTransform(sourceOrInstruction) {
+      if (!selectedNodeData) {
+        showToast('Please click an element in the canvas first', '⚠');
+        return;
+      }
+
+      let instruction = '';
+      if (typeof sourceOrInstruction === 'string' && sourceOrInstruction !== 'dock' && sourceOrInstruction !== 'chat') {
+        instruction = sourceOrInstruction;
+      } else if (sourceOrInstruction === 'dock') {
+        instruction = document.getElementById('dockPromptInput').value.trim();
+      } else {
+        const dockVal = document.getElementById('dockPromptInput')?.value.trim();
+        const mainVal = document.getElementById('promptInput')?.value.trim();
+        instruction = dockVal || mainVal;
+      }
+
+      if (!instruction) {
+        showToast('Please type an instruction for this element', '⚠');
+        return;
+      }
+
+      playSfx('click');
+      showToast(`Applying targeted AI change to <${selectedNodeData.tagName}>...`, '✨');
+      const currentCode = document.getElementById('codeView').textContent;
+      const mode = document.getElementById('engineMode').value;
+      const startTime = performance.now();
+
+      const btn = document.getElementById('dockApplyBtn');
+      if (btn) btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/v1/assistant/element/transform', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sourceHtml: currentCode,
+            elementId: selectedNodeData.amicusId,
+            targetOuterHtml: selectedNodeData.outerHTML,
+            instruction,
+            modelPreference: mode
+          })
+        });
+
+        const json = await res.json();
+        const elapsed = Math.round(performance.now() - startTime);
+        document.getElementById('pingBadge').textContent = `${elapsed}ms`;
+
+        if (json.success && json.data) {
+          blockCounter++;
+          document.getElementById('blockId').textContent = `BLOCK #${String(blockCounter).padStart(2, '0')}`;
+          document.getElementById('codeView').textContent = json.data.updatedHtml;
+          updatePreview(json.data.updatedHtml);
+          updateLineCount(json.data.updatedHtml);
+          decomposeAndRenderElementTree(json.data.updatedHtml);
+
+          // Update current selection outerHTML
+          selectedNodeData.outerHTML = json.data.modifiedElement;
+
+          playSfx('success');
+          showToast(`Surgically updated <${selectedNodeData.tagName}>: "${instruction}"`, '✓');
+
+          if (document.getElementById('dockPromptInput')) {
+            document.getElementById('dockPromptInput').value = '';
+          }
+        } else {
+          showToast(json.error || 'Transformation failed', '⚠');
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`, '❌');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function runQuickAction(instruction) {
+      if (document.getElementById('dockPromptInput')) {
+        document.getElementById('dockPromptInput').value = instruction;
+      }
+      executeContextualTransform(instruction);
+    }
+
+    async function decomposeAndRenderElementTree(code) {
+      if (!code || code.startsWith('//')) return;
+      try {
+        const res = await fetch('/api/v1/assistant/element/decompose', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html: code })
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+          const { items, totalElements } = json.data;
+          const badge = document.getElementById('elementCountBadge');
+          if (badge) badge.textContent = totalElements;
+          const container = document.getElementById('elementTreeList');
+          if (!container) return;
+
+          if (items.length === 0) {
+            container.innerHTML = `<div class="text-gray-500 text-center py-2 text-[10px]">No selectable items identified.</div>`;
+            return;
+          }
+
+          container.innerHTML = items.map(item => {
+            let icon = '🔹';
+            if (item.isImage) icon = '🖼️';
+            else if (item.isButton) icon = '🔘';
+            else if (item.isHeading) icon = '🏷️';
+            else if (item.isContainer) icon = '📦';
+
+            return `
+              <div onclick="selectElementById('${item.id}')" id="tree-item-${item.id}" class="p-1.5 rounded hover:bg-gray-900 border border-transparent hover:border-gray-800 cursor-pointer flex items-center justify-between group transition">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="text-xs">${icon}</span>
+                  <span class="text-white font-semibold text-[11px]">&lt;${item.tagName}&gt;</span>
+                  <span class="text-gray-500 text-[10px] truncate max-w-[120px]">${item.classes ? '.' + item.classes.split(' ')[0] : ''}</span>
+                </div>
+                <span class="text-[9px] text-cyan-400 font-mono bg-cyan-950/60 px-1 rounded border border-cyan-800/40">#${item.id}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (e) {
+        // non-blocking
+      }
+    }
+
+    function selectElementById(id) {
+      const frame = document.getElementById('previewFrame');
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: 'SELECT_ELEMENT_BY_ID', id }, '*');
+      }
+      highlightElementInTree(id);
+    }
+
+    function highlightElementInTree(id) {
+      document.querySelectorAll('#elementTreeList [id^="tree-item-"]').forEach(el => {
+        el.classList.remove('bg-cyan-950/80', 'border-cyan-500');
+      });
+      if (id) {
+        const target = document.getElementById(`tree-item-${id}`);
+        if (target) {
+          target.classList.add('bg-cyan-950/80', 'border-cyan-500');
+          target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }
+
+    function refreshElementTree() {
+      playSfx('click');
+      const code = document.getElementById('codeView').textContent;
+      decomposeAndRenderElementTree(code);
+      showToast('Re-indexed selectable site items', '🌳');
     }
 
     function switchTab(tab) {
@@ -883,6 +1145,11 @@
       const prompt = document.getElementById('promptInput').value.trim();
       if (!prompt) return;
 
+      // Contextual AI targeting check: If an element is selected, execute surgical contextual transform!
+      if (selectedNodeData) {
+        return executeContextualTransform(prompt);
+      }
+
       const mode = document.getElementById('engineMode').value;
       const codeView = document.getElementById('codeView');
       const startTime = performance.now();
@@ -919,6 +1186,7 @@
           codeView.textContent = code;
           updatePreview(code);
           updateLineCount(code);
+          decomposeAndRenderElementTree(code);
           playSfx('success');
           showToast(`Synthesized in ${elapsed}ms`, '⚡');
 
@@ -1021,8 +1289,18 @@
       const frame = document.getElementById('previewFrame');
       const doc = frame.contentDocument || frame.contentWindow.document;
 
-      // In-Situ Tactical Inspector Script with Figma Dev Mode click-selection
-      const inspectorScript = inspectorActive ? `
+      // Ensure elements have deterministic data-amicus-id attributes for element-level AI targeting
+      let counter = 0;
+      let instrumented = code.replace(/<([a-z0-9]+)(\s+[^>]*?)?>/gi, (match, tag, attrs = '') => {
+        const lower = tag.toLowerCase();
+        if (['html', 'head', 'body', 'script', 'style', 'path', 'svg', 'br', 'hr'].includes(lower)) return match;
+        if (attrs.includes('data-amicus-id=')) return match;
+        counter++;
+        return `<${tag} data-amicus-id="el-${counter}"${attrs}>`;
+      });
+
+      // In-Situ Tactical Inspector Script with continuous element selection & Figma Dev Mode
+      const inspectorScript = `
         <script>
           const tooltip = document.createElement('div');
           tooltip.style.position = 'fixed';
@@ -1043,34 +1321,83 @@
           let prevTarget = null;
           let selectedTarget = null;
 
+          window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'SELECT_ELEMENT_BY_ID') {
+              const el = document.querySelector('[data-amicus-id="' + e.data.id + '"]');
+              if (el) {
+                if (selectedTarget) {
+                  selectedTarget.style.outline = '';
+                  selectedTarget.style.boxShadow = '';
+                }
+                selectedTarget = el;
+                selectedTarget.style.outline = '2px solid #06b6d4';
+                selectedTarget.style.outlineOffset = '-2px';
+                selectedTarget.style.boxShadow = '0 0 16px rgba(6,182,212,0.6)';
+                selectedTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                const rect = el.getBoundingClientRect();
+                window.parent.postMessage({
+                  type: 'INSPECTOR_NODE_SELECTED',
+                  amicusId: el.getAttribute('data-amicus-id') || '',
+                  tagName: el.tagName.toLowerCase(),
+                  className: el.className || '',
+                  outerHTML: el.outerHTML || '',
+                  width: rect.width,
+                  height: rect.height
+                }, '*');
+              }
+            } else if (e.data && e.data.type === 'CLEAR_SELECTION') {
+              if (selectedTarget) {
+                selectedTarget.style.outline = '';
+                selectedTarget.style.boxShadow = '';
+                selectedTarget = null;
+              }
+            }
+          });
+
           document.addEventListener('mouseover', (e) => {
-            if (e.target === tooltip || e.target === document.body) return;
-            if (prevTarget && prevTarget !== selectedTarget) prevTarget.style.outline = '';
+            if (e.target === tooltip || e.target === document.body || e.target === document.documentElement) return;
+            if (prevTarget && prevTarget !== selectedTarget) {
+              prevTarget.style.outline = '';
+              prevTarget.style.boxShadow = '';
+            }
             prevTarget = e.target;
             if (prevTarget !== selectedTarget) {
               prevTarget.style.outline = '2px dashed #06b6d4';
               prevTarget.style.outlineOffset = '-2px';
             }
             const rect = e.target.getBoundingClientRect();
-            tooltip.innerHTML = '<strong>&lt;' + e.target.tagName.toLowerCase() + '&gt;</strong> ' + Math.round(rect.width) + 'x' + Math.round(rect.height) + 'px' + (e.target.className ? ' <span style="opacity:0.6">.' + e.target.className.split(' ').slice(0, 3).join('.') + '</span>' : '');
+            const aid = e.target.getAttribute('data-amicus-id') || '';
+            tooltip.innerHTML = '<strong>&lt;' + e.target.tagName.toLowerCase() + '&gt;</strong> ' + 
+              (aid ? '<span style="color:#06b6d4">#' + aid + '</span> ' : '') + 
+              Math.round(rect.width) + 'x' + Math.round(rect.height) + 'px' + 
+              (e.target.className ? ' <span style="opacity:0.6">.' + e.target.className.split(' ').slice(0, 3).join('.') + '</span>' : '');
           });
 
           document.addEventListener('mouseout', (e) => {
             if (e.target === prevTarget && prevTarget !== selectedTarget) {
               prevTarget.style.outline = '';
+              prevTarget.style.boxShadow = '';
             }
           });
 
           document.addEventListener('click', (e) => {
             e.preventDefault();
-            if (selectedTarget) selectedTarget.style.outline = '';
+            if (e.target === tooltip || e.target === document.body || e.target === document.documentElement) return;
+            if (selectedTarget) {
+              selectedTarget.style.outline = '';
+              selectedTarget.style.boxShadow = '';
+            }
             selectedTarget = e.target;
             selectedTarget.style.outline = '2px solid #38bdf8';
             selectedTarget.style.outlineOffset = '-2px';
+            selectedTarget.style.boxShadow = '0 0 16px rgba(56,189,248,0.6)';
 
             const rect = e.target.getBoundingClientRect();
+            const aid = e.target.getAttribute('data-amicus-id') || '';
             window.parent.postMessage({
               type: 'INSPECTOR_NODE_SELECTED',
+              amicusId: aid,
               tagName: e.target.tagName.toLowerCase(),
               className: e.target.className || '',
               outerHTML: e.target.outerHTML || '',
@@ -1079,7 +1406,7 @@
             }, '*');
           });
         <\/script>
-      ` : '';
+      `;
 
       doc.open();
       doc.write(`
@@ -1093,7 +1420,7 @@
           </style>
         </head>
         <body>
-          ${code}
+          ${instrumented}
           ${inspectorScript}
         </body>
         </html>
@@ -1112,22 +1439,24 @@
 
     function copyCode() {
       const code = document.getElementById('codeView').textContent;
-      navigator.clipboard.writeText(code);
+      const clean = code.replace(/\s*data-amicus-id=["'][^"']*["']/gi, '');
+      navigator.clipboard.writeText(clean);
       playSfx('success');
-      showToast('Code copied to clipboard', '✓');
+      showToast('Clean code copied to clipboard', '✓');
     }
 
     function downloadCode() {
       playSfx('click');
       const code = document.getElementById('codeView').textContent;
-      const blob = new Blob([code], { type: 'text/html' });
+      const clean = code.replace(/\s*data-amicus-id=["'][^"']*["']/gi, '');
+      const blob = new Blob([clean], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = 'amicus-component.html';
       a.click();
       URL.revokeObjectURL(url);
-      showToast('Exported amicus-component.html', '💾');
+      showToast('Exported clean amicus-component.html', '💾');
     }
 
     // RAYCAST / LINEAR COMMAND PALETTE CONTROLS
