@@ -1,0 +1,146 @@
+<!-- Copyright (c) 2026 Amicus Technology Services Inc. All Rights Reserved. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amicus Studio™ | WebDaaS Playground</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .code-editor { font-family: "JetBrains Mono", Consolas, monospace; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Top Navigation -->
+  <header class="border-b border-gray-800 bg-gray-900/60 backdrop-blur px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-xl font-bold text-white tracking-tight">Amicus Studio™</span>
+      <span class="bg-blue-600/20 text-blue-400 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-blue-500/30">WebDaaS Engine</span>
+    </div>
+    <div class="text-xs text-gray-400">
+      Amicus Technology Services Inc.
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+    <!-- Left Sidebar: Controls & Prompting -->
+    <div class="w-full lg:w-96 border-r border-gray-800 bg-gray-900/40 p-6 flex flex-col gap-6">
+      <div>
+        <label class="block text-sm font-semibold text-gray-200 mb-2">Describe What to Build</label>
+        <textarea id="promptInput" rows="4" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-gray-100 focus:outline-none focus:border-blue-500 transition resize-none" placeholder="e.g. Build a hero section with gradient headline, waitlist button, and modern badge..."></textarea>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="synthesize()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition shadow-lg shadow-blue-500/10">
+          Synthesize Component
+        </button>
+      </div>
+
+      <!-- Quick Preset Buttons -->
+      <div>
+        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Quick Presets</span>
+        <div class="flex flex-col gap-2">
+          <button onclick="setPrompt('Build a high-conversion hero banner with CTA')" class="text-left text-xs bg-gray-800/60 hover:bg-gray-800 p-2.5 rounded border border-gray-700/50 transition">
+            🚀 Hero Section Banner
+          </button>
+          <button onclick="setPrompt('Build a 3-tier SaaS pricing table with popular badge')" class="text-left text-xs bg-gray-800/60 hover:bg-gray-800 p-2.5 rounded border border-gray-700/50 transition">
+            💳 SaaS Pricing Grid
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Audit Scorecard -->
+      <div id="auditCard" class="mt-auto p-4 rounded-xl bg-gray-950 border border-gray-800 hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-gray-400">Quality & a11y Score</span>
+          <span id="auditGrade" class="text-sm font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">Grade A</span>
+        </div>
+        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+          <div id="auditBar" class="bg-green-500 h-full w-full transition-all"></div>
+        </div>
+        <p id="auditStatus" class="text-xs text-gray-400 mt-2">All semantic checks passed.</p>
+      </div>
+    </div>
+
+    <!-- Right Content Area: Split Code & Live Preview -->
+    <div class="flex-1 flex flex-col lg:flex-row">
+      <!-- Code Output -->
+      <div class="w-full lg:w-1/2 border-r border-gray-800 flex flex-col bg-gray-950">
+        <div class="px-4 py-2 border-b border-gray-800 bg-gray-900/50 flex justify-between items-center text-xs text-gray-400">
+          <span>Synthesized HTML & Tailwind</span>
+          <button onclick="copyCode()" class="hover:text-white transition">Copy Code</button>
+        </div>
+        <pre id="codeView" class="p-4 flex-1 text-xs code-editor overflow-auto text-blue-300 leading-relaxed whitespace-pre-wrap select-all">// Press 'Synthesize Component' to generate web code...</pre>
+      </div>
+
+      <!-- Live Sandboxed Rendering -->
+      <div class="w-full lg:w-1/2 flex flex-col bg-black">
+        <div class="px-4 py-2 border-b border-gray-800 bg-gray-900/50 flex justify-between items-center text-xs text-gray-400">
+          <span>Sandboxed Live Preview</span>
+          <span class="text-green-400">● Live Canvas</span>
+        </div>
+        <div class="flex-1 p-4 flex items-center justify-center overflow-auto">
+          <iframe id="previewFrame" class="w-full h-full min-h-[450px] border border-gray-800 rounded-lg bg-[#090d16]" sandbox="allow-scripts"></iframe>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function setPrompt(text) {
+      document.getElementById('promptInput').value = text;
+      synthesize();
+    }
+
+    async function synthesize() {
+      const prompt = document.getElementById('promptInput').value.trim();
+      if (!prompt) return;
+
+      const codeView = document.getElementById('codeView');
+      codeView.textContent = '// Synthesizing via Amicus WebDaaS Engine...';
+
+      try {
+        const res = await fetch('/api/v1/assistant/synthesize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ intent: prompt })
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+          const { code, audit } = json.data;
+          codeView.textContent = code;
+
+          // Render inside preview iframe
+          const frame = document.getElementById('previewFrame');
+          const doc = frame.contentDocument || frame.contentWindow.document;
+          doc.open();
+          doc.write(`<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"><\/script></head><body class="bg-[#090d16] text-white p-6">${code}</body></html>`);
+          doc.close();
+
+          // Update Audit Card
+          const card = document.getElementById('auditCard');
+          const grade = document.getElementById('auditGrade');
+          const bar = document.getElementById('auditBar');
+          const status = document.getElementById('auditStatus');
+          card.classList.remove('hidden');
+          grade.textContent = `Grade ${audit.grade} (${audit.score}/100)`;
+          bar.style.width = `${audit.score}%`;
+          status.textContent = audit.issues.length ? audit.issues.join(', ') : 'All responsive & accessibility checks passed.';
+        } else {
+          codeView.textContent = `// Error: ${json.error || 'Failed to synthesize'}`;
+        }
+      } catch (err) {
+        codeView.textContent = `// Network Error: ${err.message}`;
+      }
+    }
+
+    function copyCode() {
+      const code = document.getElementById('codeView').textContent;
+      navigator.clipboard.writeText(code);
+      alert('Code copied to clipboard!');
+    }
+  </script>
+</body>
+</html>
