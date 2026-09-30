@@ -146,6 +146,9 @@
       <button onclick="switchTab('patcher')" id="tabBtn-patcher" class="px-3 py-1.5 rounded text-gray-400 hover:text-gray-200 border border-transparent transition flex items-center gap-1.5">
         <span>🩹</span> Surgical Code Patcher
       </button>
+      <button onclick="switchTab('nocturnal')" id="tabBtn-nocturnal" class="px-3 py-1.5 rounded text-gray-400 hover:text-gray-200 border border-transparent transition flex items-center gap-1.5">
+        <span>🌙</span> Nocturnal Intelligence
+      </button>
     </div>
 
     <!-- Warp-inspired Split / Single Viewport Toggle -->
@@ -236,6 +239,14 @@
               </div>
               <span class="text-[10px] text-gray-500 font-mono bg-gray-900 px-1.5 py-0.5 rounded border border-gray-800">Alt+4</span>
             </button>
+
+            <button onclick="loadDemo(5)" class="group text-left text-xs font-mono bg-gray-950/80 hover:bg-gray-900/90 p-2.5 rounded-lg border border-gray-800 hover:border-cyan-500/50 transition flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-cyan-400">⚡</span>
+                <span class="text-gray-300 group-hover:text-white font-medium">Express Checkout (Link, Wallets)</span>
+              </div>
+              <span class="text-[10px] text-gray-500 font-mono bg-gray-900 px-1.5 py-0.5 rounded border border-gray-800">Alt+5</span>
+            </button>
           </div>
         </div>
       </div>
@@ -265,6 +276,43 @@
         <button onclick="applyCodePatch()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-semibold py-2.5 px-4 rounded-lg text-xs transition shadow-lg shadow-emerald-500/20 border border-emerald-400/30">
           🩹 EXECUTE SURGICAL PATCH
         </button>
+      </div>
+
+      <!-- NOCTURNAL INTELLIGENCE VIEW -->
+      <div id="view-nocturnal" class="hidden flex flex-col gap-3 font-mono text-xs">
+        <div class="p-2.5 rounded-lg bg-cyan-950/40 border border-cyan-800/50 text-[11px] text-cyan-300">
+          <span class="font-bold text-white">AUTONOMOUS RADAR:</span> Nightly scan for zero-touch services, EOL tracking, & maintenance windows.
+          <div class="mt-1 text-[10px] text-gray-400 italic">"We pay more for automation and speed."</div>
+        </div>
+
+        <div class="flex items-center justify-between bg-gray-950 p-2 rounded-lg border border-gray-800">
+          <span class="text-gray-400 text-[11px]">NIGHTLY SCHEDULE:</span>
+          <span class="text-emerald-400 font-bold">02:00 AM (AUTO)</span>
+        </div>
+
+        <button onclick="triggerNocturnalRun()" id="nocturnalRunBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-semibold py-2.5 px-4 rounded-lg text-xs transition shadow-lg shadow-cyan-500/20 border border-cyan-400/30 flex items-center justify-center gap-2">
+          <span>🌙</span> TRIGGER NOCTURNAL CYCLE
+        </button>
+
+        <button onclick="loadLatestNocturnalReport()" class="w-full bg-gray-900 hover:bg-gray-800 text-gray-300 font-mono py-2 px-3 rounded-lg text-xs transition border border-gray-700 flex items-center justify-center gap-1.5">
+          <span>📄</span> LOAD LATEST BRIEFING
+        </button>
+
+        <!-- Live Nocturnal Stats Pill -->
+        <div id="nocturnalStatsPill" class="mt-1 p-2.5 bg-gray-950 rounded-lg border border-gray-800 text-[11px] flex flex-col gap-1.5">
+          <div class="flex justify-between">
+            <span class="text-gray-500">CANDIDATES SCANNED:</span>
+            <span id="nocturnalCandidatesCount" class="text-cyan-400 font-bold">--</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">ZERO-TOUCH ADOPTIONS:</span>
+            <span id="nocturnalAdoptionCount" class="text-emerald-400 font-bold">--</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">MAINTENANCE ALERTS:</span>
+            <span id="nocturnalAlertsCount" class="text-amber-400 font-bold">--</span>
+          </div>
+        </div>
       </div>
 
       <!-- DIEGETIC QUALITY & VERIFICATION SCORECARD -->
@@ -448,6 +496,7 @@
       { id: 'demo2', title: 'Load Demo: Developer Telemetry Deck', category: 'Demos', hotkey: 'Alt+2', action: () => loadDemo(2) },
       { id: 'demo3', title: 'Load Demo: Enterprise Pricing Matrix', category: 'Demos', hotkey: 'Alt+3', action: () => loadDemo(3) },
       { id: 'demo4', title: 'Load Demo: Fortified Auth & 2FA Gate', category: 'Demos', hotkey: 'Alt+4', action: () => loadDemo(4) },
+      { id: 'demo5', title: 'Load Demo: Express Checkout (Link, Wallets, PayPal)', category: 'Demos', hotkey: 'Alt+5', action: () => loadDemo(5) },
       { id: 'run', title: 'Execute Synthesis Prompt', category: 'Core', hotkey: 'Ctrl+Enter', action: () => synthesize() },
       { id: 'copy', title: 'Copy Synthesized Code to Clipboard', category: 'Code', hotkey: 'Alt+C', action: () => copyCode() },
       { id: 'export', title: 'Export Component as HTML Bundle', category: 'Code', hotkey: '', action: () => downloadCode() },
@@ -461,6 +510,8 @@
       { id: 'lay_code', title: 'Set Layout: Code Only', category: 'Layout', hotkey: '', action: () => setLayout('code') },
       { id: 'tab_api', title: 'Switch Tool: REST API Scaffolder', category: 'Navigation', hotkey: '', action: () => switchTab('api') },
       { id: 'tab_patch', title: 'Switch Tool: Surgical Code Patcher', category: 'Navigation', hotkey: '', action: () => switchTab('patcher') },
+      { id: 'tab_nocturnal', title: 'Switch Tool: Nocturnal Autonomous Intelligence', category: 'Navigation', hotkey: 'Alt+N', action: () => switchTab('nocturnal') },
+      { id: 'run_nocturnal', title: 'Trigger Nocturnal Provider Discovery Cycle', category: 'Autonomous', hotkey: '', action: () => triggerNocturnalRun() },
       { id: 'help', title: 'Show Keyboard Shortcuts Cheat Sheet', category: 'Help', hotkey: '?', action: () => openShortcutsModal() }
     ];
 
@@ -660,9 +711,10 @@
     function switchTab(tab) {
       activeTab = tab;
       playSfx('click');
-      ['component', 'api', 'patcher'].forEach(t => {
+      ['component', 'api', 'patcher', 'nocturnal'].forEach(t => {
         const btn = document.getElementById(`tabBtn-${t}`);
         const view = document.getElementById(`view-${t}`);
+        if (!btn || !view) return;
         if (t === tab) {
           btn.className = "px-3 py-1.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30 font-medium transition flex items-center gap-1.5";
           view.classList.remove('hidden');
@@ -671,7 +723,143 @@
           view.classList.add('hidden');
         }
       });
+
+      if (tab === 'nocturnal') {
+        loadLatestNocturnalReport();
+      }
     }
+
+    async function loadLatestNocturnalReport() {
+      const codeView = document.getElementById('codeView');
+      const codeTitle = document.getElementById('codeTitle');
+      const lineCount = document.getElementById('lineCount');
+      playSfx('click');
+      try {
+        const res = await fetch('/api/v1/assistant/nocturnal/latest');
+        const json = await res.json();
+        if (json.success && json.data) {
+          renderNocturnalTelemetry(json.data);
+          showToast('Loaded latest nocturnal intelligence briefing', '🌙');
+        }
+      } catch (err) {
+        showToast('Running nocturnal cycle...', '🌙');
+        triggerNocturnalRun();
+      }
+    }
+
+    async function triggerNocturnalRun() {
+      const btn = document.getElementById('nocturnalRunBtn');
+      const codeView = document.getElementById('codeView');
+      const codeTitle = document.getElementById('codeTitle');
+      if (btn) btn.disabled = true;
+      playSfx('click');
+      showToast('Executing nocturnal provider discovery cycle...', '🌙');
+
+      codeTitle.textContent = '🌙 Nocturnal Provider Discovery Engine';
+      codeView.textContent = '// Running nocturnal provider discovery & EOL lifecycle audit...\n// Scanning service universe for zero-touch APIs...\n// Applying mandate: "We will pay more for automation and speed"...\n';
+
+      try {
+        const res = await fetch('/api/v1/assistant/nocturnal/run', { method: 'POST' });
+        const json = await res.json();
+        if (json.success && json.data) {
+          renderNocturnalTelemetry(json.data);
+          playSfx('success');
+          showToast('Nocturnal cycle finished & report generated!', '✓');
+        } else {
+          throw new Error(json.error || 'Execution failed');
+        }
+      } catch (err) {
+        codeView.textContent = `// Error executing nocturnal cycle: ${err.message}`;
+        showToast('Nocturnal run failed', '❌');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function renderNocturnalTelemetry(report) {
+      const candidatesEl = document.getElementById('nocturnalCandidatesCount');
+      const adoptionEl = document.getElementById('nocturnalAdoptionCount');
+      const alertsEl = document.getElementById('nocturnalAlertsCount');
+      const codeView = document.getElementById('codeView');
+      const codeTitle = document.getElementById('codeTitle');
+      const lineCount = document.getElementById('lineCount');
+
+      if (candidatesEl) candidatesEl.textContent = report.summary.candidatesScanned;
+      if (adoptionEl) adoptionEl.textContent = `${report.summary.topRecommendedCount} Recommended`;
+      if (alertsEl) alertsEl.textContent = `${report.summary.alertsCount} Active`;
+
+      codeTitle.textContent = `🌙 Nocturnal Report: ${report.cycleId}`;
+
+      const formattedJson = JSON.stringify(report, null, 2);
+      codeView.textContent = formattedJson;
+      lineCount.textContent = `(${formattedJson.split('\n').length} lines)`;
+
+      // Render executive summary into the preview canvas iframe
+      const previewFrame = document.getElementById('previewFrame');
+      if (previewFrame) {
+        const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+        doc.open();
+        doc.write(`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <script src="https://cdn.tailwindcss.com"><\/script>
+            <style>
+              body { margin: 0; padding: 1.5rem; background-color: #070a11; color: #cbd5e1; font-family: monospace; }
+            </style>
+          </head>
+          <body class="p-6 text-xs">
+            <div class="border-b border-cyan-800/60 pb-3 mb-4">
+              <div class="text-cyan-400 font-bold text-sm tracking-wider uppercase">NOCTURNAL INTELLIGENCE BRIEFING</div>
+              <div class="text-gray-500 text-[11px]">Cycle: ${report.cycleId} | Policy: "Pay more for automation & speed"</div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mb-5">
+              <div class="bg-gray-900/90 border border-gray-800 p-3 rounded-lg">
+                <div class="text-gray-400 text-[10px]">CANDIDATES SCANNED</div>
+                <div class="text-cyan-400 text-lg font-bold">${report.summary.candidatesScanned}</div>
+              </div>
+              <div class="bg-gray-900/90 border border-gray-800 p-3 rounded-lg">
+                <div class="text-gray-400 text-[10px]">ZERO-TOUCH INTEGRATIONS</div>
+                <div class="text-emerald-400 text-lg font-bold">${report.summary.topRecommendedCount}</div>
+              </div>
+              <div class="bg-gray-900/90 border border-gray-800 p-3 rounded-lg">
+                <div class="text-gray-400 text-[10px]">MAINTENANCE / EOL ALERTS</div>
+                <div class="text-amber-400 text-lg font-bold">${report.summary.alertsCount}</div>
+              </div>
+            </div>
+
+            <div class="text-gray-300 font-semibold mb-2 uppercase text-[11px] tracking-wider">Top Recommended Providers:</div>
+            <div class="space-y-2 mb-5">
+              ${report.topRecommendations.map(r => `
+                <div class="p-3 bg-gray-900/60 border border-gray-800 rounded-lg flex flex-col gap-1">
+                  <div class="flex justify-between items-center">
+                    <span class="text-white font-bold text-xs">${r.name}</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Score: ${r.compositeScore}/100</span>
+                  </div>
+                  <div class="text-gray-400 text-[11px]">${r.category} • ~$${r.monthlyCostEst}/mo • Zero-Touch: ${r.zeroTouchScore}/100</div>
+                  <div class="text-cyan-300 text-[10px]">${r.economicJustification}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="text-gray-300 font-semibold mb-2 uppercase text-[11px] tracking-wider">Active Services EOL & Maintenance Windows:</div>
+            <div class="space-y-1.5">
+              ${report.currentServicesAudit.alerts.map(a => `
+                <div class="p-2.5 bg-gray-900/40 border border-gray-800 rounded text-[11px] flex items-center justify-between">
+                  <span class="text-amber-300">[${a.severity}] ${a.service}</span>
+                  <span class="text-gray-400 text-[10px]">${a.message || a.impact}</span>
+                </div>
+              `).join('')}
+            </div>
+          </body>
+          </html>
+        `);
+        doc.close();
+      }
+    }
+
 
     // Loadout Demos
     function loadDemo(num) {
@@ -684,6 +872,8 @@
         document.getElementById('promptInput').value = "Build a 3-tier enterprise SaaS pricing table with feature matrix";
       } else if (num === 4) {
         document.getElementById('promptInput').value = "Build a fortified auth and 2FA key gate with semantic guardrails";
+      } else if (num === 5) {
+        document.getElementById('promptInput').value = "Build an express checkout modal with Link by Stripe, Apple Pay, Google Pay, and PayPal";
       }
       synthesize();
     }
@@ -1056,11 +1246,12 @@
         synthesize();
       }
 
-      // Alt + 1, 2, 3, 4: Load Demos
+      // Alt + 1, 2, 3, 4, 5: Load Demos
       if (e.altKey && e.key === '1') { e.preventDefault(); loadDemo(1); }
       if (e.altKey && e.key === '2') { e.preventDefault(); loadDemo(2); }
       if (e.altKey && e.key === '3') { e.preventDefault(); loadDemo(3); }
       if (e.altKey && e.key === '4') { e.preventDefault(); loadDemo(4); }
+      if (e.altKey && e.key === '5') { e.preventDefault(); loadDemo(5); }
 
       // Alt + I: Toggle In-Situ Inspector
       if (e.altKey && (e.key === 'i' || e.key === 'I')) {
@@ -1072,6 +1263,12 @@
       if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
         copyCode();
+      }
+
+      // Alt + N: Switch to Nocturnal Intelligence
+      if (e.altKey && (e.key === 'n' || e.key === 'N')) {
+        e.preventDefault();
+        switchTab('nocturnal');
       }
     });
 
