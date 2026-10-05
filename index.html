@@ -133,33 +133,26 @@
       <!-- Desktop Navigation Links -->
       <nav class="hidden lg:flex items-center space-x-6 text-xs font-semibold text-slate-300">
         <a href="#features" class="hover:text-white transition">Features</a>
-        <a href="/browser" class="hover:text-cyan-400 transition flex items-center space-x-1">
-          <span>🤖</span>
-          <span>Live Browser</span>
-        </a>
-        <a href="/web-studio" class="hover:text-blue-400 transition flex items-center space-x-1">
-          <span>⚡</span>
-          <span>Web Studio™</span>
-        </a>
-        <a href="/standing" class="hover:text-indigo-300 transition flex items-center space-x-1">
+        <a href="#technology" class="hover:text-cyan-400 transition">Technology</a>
+        <a href="#pricing" class="hover:text-white transition">Pricing</a>
+        <a href="/standing.html" class="hover:text-indigo-300 transition flex items-center space-x-1">
           <span>🛡️</span>
-          <span>Legitimacy Sentinel</span>
+          <span>Corporate Standing</span>
         </a>
-        <a href="/trust" class="hover:text-emerald-400 transition flex items-center space-x-1">
+        <a href="/trust.html" class="hover:text-emerald-400 transition flex items-center space-x-1">
           <span>🔒</span>
           <span>Trust Center</span>
         </a>
-        <a href="#pricing" class="hover:text-white transition">Pricing</a>
         <a href="#faq" class="hover:text-white transition">FAQ</a>
       </nav>
 
       <!-- Action Buttons -->
       <div class="flex items-center space-x-3">
-        <a href="/browser" class="hidden sm:inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-bold text-cyan-300 bg-cyan-950/60 border border-cyan-800/60 hover:bg-cyan-900/60 transition">
-          🤖 Agent Browser
+        <a href="#pricing" class="hidden sm:inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 bg-slate-900 border border-slate-700 hover:border-slate-500 transition">
+          View Plans
         </a>
-        <a href="/web-studio" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-600/30 transition">
-          ⚡ Launch Studio™
+        <a href="#waitlist" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-600/30 transition">
+          Request Early Access
         </a>
       </div>
     </div>
@@ -196,21 +189,19 @@
 
       <!-- CTA Buttons -->
       <div class="flex flex-wrap justify-center items-center gap-4 pt-4">
-        <a href="/browser" class="px-6 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-xl shadow-cyan-500/20 flex items-center space-x-2 transition transform hover:-translate-y-0.5">
-          <span>🤖 Launch Live Agent Browser Deck</span>
-          <span class="text-xs opacity-80 font-mono">[Side-by-Side]</span>
+        <a href="#waitlist" class="px-6 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-xl shadow-cyan-500/20 flex items-center space-x-2 transition transform hover:-translate-y-0.5">
+          <span>⚡ Request Priority Early Access</span>
         </a>
-        <a href="/web-studio" class="px-6 py-3.5 rounded-xl font-bold text-sm text-slate-100 bg-slate-900 border border-slate-700 hover:border-blue-500 hover:bg-slate-800 flex items-center space-x-2 transition transform hover:-translate-y-0.5">
-          <span>⚡ Open Amicus Web Studio™</span>
-          <span class="text-xs text-blue-400 font-mono">[Synthesizer]</span>
+        <a href="#features" class="px-6 py-3.5 rounded-xl font-bold text-sm text-slate-100 bg-slate-900 border border-slate-700 hover:border-blue-500 hover:bg-slate-800 flex items-center space-x-2 transition transform hover:-translate-y-0.5">
+          <span>⚙️ Platform Capabilities</span>
         </a>
-        <a href="/trust" class="px-5 py-3.5 rounded-xl font-semibold text-sm text-slate-300 hover:text-white bg-slate-950/60 border border-slate-800 hover:border-slate-700 flex items-center space-x-2 transition">
+        <a href="/trust.html" class="px-5 py-3.5 rounded-xl font-semibold text-sm text-slate-300 hover:text-white bg-slate-950/60 border border-slate-800 hover:border-slate-700 flex items-center space-x-2 transition">
           <span>🔒 Enterprise Trust Center</span>
         </a>
       </div>
 
       <!-- Early Access / Developer Activation Form -->
-      <div class="max-w-md mx-auto pt-6">
+      <div id="waitlist" class="max-w-md mx-auto pt-6 scroll-mt-24">
         <form class="flex p-1.5 bg-slate-900/90 border border-slate-800 rounded-xl shadow-2xl focus-within:border-blue-500 transition" onsubmit="event.preventDefault(); alert('Thank you! Your enterprise developer preview invitation has been registered with Amicus Technology Services Inc.');">
           <input type="email" placeholder="Enter corporate or work email..." required class="flex-1 bg-transparent px-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none font-mono">
           <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition">
@@ -765,13 +756,13 @@
 
         <!-- Solutions & Products -->
         <div class="space-y-3">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-white font-mono">Platforms &amp; Tools</h4>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-white font-mono">Platform &amp; Architecture</h4>
           <ul class="space-y-2 text-xs">
-            <li><a href="/web-studio" class="hover:text-white transition">Amicus Web Studio™</a></li>
-            <li><a href="/browser" class="hover:text-white transition">Live Agent Browser Deck</a></li>
-            <li><a href="/standing" class="hover:text-white transition">Legitimacy Sentinel</a></li>
-            <li><a href="/security-sentinel" class="hover:text-white transition">Vulnerability Radar</a></li>
-            <li><a href="#features" class="hover:text-white transition">WebDaaS™ Engine</a></li>
+            <li><a href="#features" class="hover:text-white transition">Autonomous WebDaaS™ Core</a></li>
+            <li><a href="#technology" class="hover:text-white transition">Deterministic AST Engine</a></li>
+            <li><a href="#security" class="hover:text-white transition">Cryptographic Provenance</a></li>
+            <li><a href="/standing.html" class="hover:text-white transition">Corporate Standing &amp; Legitimacy</a></li>
+            <li><a href="#pricing" class="hover:text-white transition">Enterprise Plans &amp; SLAs</a></li>
           </ul>
         </div>
 
